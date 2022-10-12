@@ -130,13 +130,13 @@ contract SwapCart{
     }
 
     // The advert creator will be able to cancel advert.
-    function cancelSaleAdvert(uint itmId) external expireCheck(itmId) {
+    function cancelSaleAdvert(uint itmId) external expireCheck(itmId) ownerCheck(itmId){
         itemsOfUsers[itmId][msg.sender] -= 1;
         delete items[itmId];  // If the conditions are met, we delete the target item from mapping.
         emit CancelSaleAdvert(itmId,msg.sender); // Here we use the cancel sale advert event we created earlier to be aware of the status.
     }
     // Users will be able to purchase while the item advert is still going.
-    function payment(uint itmId, uint amount) external expireCheck(itmId) balanceCheck(itmId) {
+    function payment(uint itmId, uint amount) external expireCheck(itmId) balanceCheck(itmId) buyerCheck(itmId){
         Item storage item = items[itmId]; // We create item variable on storage to hold item informations which exist with given item id
         itemsOfUsers[itmId][msg.sender] += 1;  // We increase the item amount of the target item according to the function caller.
         itemsOfUsers[itmId][item.seller] -= 1;
@@ -146,7 +146,7 @@ contract SwapCart{
     }
 
     // Users will be able to return payment while the item advert is still going.
-    function returnItem(uint itmId, uint amount) external expireCheck(itmId) {
+    function returnItem(uint itmId, uint amount) external expireCheck(itmId) buyerCheck(itmId){
         itemsOfUsers[itmId][msg.sender] -= 1;  // We decrease the item amount of the target item according to the function caller.
         itemsOfUsers[itmId][items[itmId].seller] += 1;
         token.transfer(msg.sender, amount);  // We transfer return payment amount to caller over the token.
@@ -161,7 +161,7 @@ contract SwapCart{
     }
 
     // Users will be able to give star to any item.
-    function addStar(uint itmId) public buyerCheck(itmId){
+    function addStar(uint itmId) public buyerCheck(itmId) {
         items[itmId].star++;
         emit AddStar(itmId,items[itmId].star,msg.sender); // Here we use the AddStar event we created earlier to be aware of the status.
     }
